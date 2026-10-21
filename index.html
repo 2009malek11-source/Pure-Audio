@@ -2,181 +2,306 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SafeMedia – تنقية الفيديو والصوت</title>
-  <meta name="theme-color" content="#0f766e">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- منع الزوم وملء الشاشة بالكامل بما فيها منطقة النوتش (iOS) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-  <!-- خط Cairo من Google Fonts -->
+  <!-- سياسة أمان المحتوى (CSP): تسمح فقط بالمصادر المعتمدة أدناه.
+       ملاحظة: عند ربط سيرفر المعالجة أضف عنوانه إلى connect-src. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+    img-src 'self' data: blob:;
+    media-src 'self' blob:;
+    connect-src 'self';
+    worker-src 'self';
+    manifest-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+
+  <title>Pure Audio – تنقية الفيديو والصوت</title>
+  <meta name="description" content="تطبيق لتنقية الفيديو والصوت بالذكاء الاصطناعي">
+
+  <!-- أوسمة PWA وتشغيل التطبيق بدون شريط المتصفح -->
+  <meta name="theme-color" content="#0b4ea2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pure Audio">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Google Fonts: Cairo (عربي) + Inter (إنجليزي) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome للأيقونات -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Tailwind CSS عبر CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS عبر CDN (أدوات مساعدة للتخطيط) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
 
-  <!-- شريط حالة الاتصال -->
-  <div id="offlineBar" class="hidden bg-amber-500 text-white text-center text-sm py-1">
-    <i class="fa-solid fa-wifi-slash ml-1"></i> أنت غير متصل — يمكنك مشاهدة المحفوظات فقط
+<!-- ====== مكتبة الأيقونات المتجهة (SVG Sprite) مدمجة بالكامل — لا تحتاج تحميلاً خارجياً ====== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <!-- منزل بسيط (Minimalist) -->
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+  <!-- ترس هندسي بثمانية أسنان -->
+  <symbol id="i-gear" viewBox="0 0 24 24"><g class="gear-teeth"><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(45 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(90 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(135 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(180 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(225 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(270 12 12)"/><rect x="10.6" y="1.8" width="2.8" height="4" rx=".8" transform="rotate(315 12 12)"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/></g></symbol>
+  <!-- مستند -->
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h6M9.5 16h6"/></symbol>
+  <!-- قلم وورقة -->
+  <symbol id="i-penpaper" viewBox="0 0 24 24"><path d="M5 4h9v6M5 4v16h8"/><path d="M8 8h3M8 12h2"/><path d="M20.5 9.5l-7 7-.8 3 3-.8 7-7z" transform="translate(-1.5 -1)"/></symbol>
+  <!-- بوصلة -->
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5M7.5 9.5 12 5l4.5 4.5M5 19.5h14"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M6 12v7.5h12V12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 14h2v2M14 18h2v2M18 18h2v2"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4 20 15 9"/><path d="M13.5 7.5l3 3"/><path d="M19 3v4M17 5h4M20 12v2M19 13h2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="18.5" r="1.3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 2.5v6c0 4.5-3 7.8-7 9.5-4-1.7-7-5-7-9.5v-6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+</svg>
+
+<!-- ====== المقدمة السينمائية (Intro) ====== -->
+<div id="intro" class="intro" aria-hidden="true">
+  <div class="bar bar-top"></div><div class="bar bar-bottom"></div>
+  <div class="intro-glow"></div>
+  <div class="intro-center">
+    <!-- موجة صوتية متحركة تتحول إلى الشعار -->
+    <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <img class="intro-logo" src="logo.png" alt="Pure Audio" width="660" height="510">
+    <p class="intro-tag">صوت نقي · محتوى آمن</p>
   </div>
+  <button id="introSkip" class="intro-skip" type="button">تخطي</button>
+</div>
 
-  <!-- الترويسة -->
-  <header class="hero text-white">
-    <div class="max-w-4xl mx-auto px-4 py-6 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-shield-halved text-3xl"></i>
-        <div>
-          <h1 class="text-2xl font-bold">SafeMedia</h1>
-          <p class="text-teal-100 text-sm">تنقية الفيديو والصوت بالذكاء الاصطناعي</p>
-        </div>
-      </div>
-      <button id="installBtn" class="hidden bg-white text-teal-700 font-semibold rounded-full px-4 py-2 text-sm shadow">
-        <i class="fa-solid fa-download ml-1"></i> تثبيت التطبيق
-      </button>
-    </div>
-  </header>
+<!-- شريط حالة الاتصال -->
+<div id="offlineBar" class="offline hidden">أنت غير متصل — المحفوظات متاحة فقط</div>
 
-  <main class="max-w-4xl mx-auto px-4 -mt-6 pb-16 space-y-5">
+<!-- ====== الترويسة ====== -->
+<header class="top">
+  <div class="top-in">
+    <img src="logo.png" alt="Pure Audio" class="top-logo" width="132" height="102">
+    <button id="installTop" class="chip hidden" type="button">
+      <svg class="ico"><use href="#i-download"/></svg><span>تثبيت</span>
+    </button>
+  </div>
+</header>
 
-    <!-- 1) مصدر الإدخال -->
-    <section class="card">
-      <h2 class="card-title"><i class="fa-solid fa-1"></i> اختر المصدر</h2>
-      <div class="flex gap-2 mb-4">
-        <button class="tab active" data-tab="upload"><i class="fa-solid fa-upload ml-1"></i> رفع ملف</button>
-        <button class="tab" data-tab="url"><i class="fa-solid fa-link ml-1"></i> رابط</button>
+<main class="wrap">
+
+  <!-- ================= الرئيسية ================= -->
+  <section class="view active" data-view="home">
+
+    <div class="card">
+      <h2 class="card-title"><span class="num">1</span> اختر المصدر</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="upload" type="button"><svg class="ico"><use href="#i-upload"/></svg> رفع ملف</button>
+        <button class="tab" data-tab="url" type="button"><svg class="ico"><use href="#i-link"/></svg> رابط</button>
       </div>
 
       <div id="tab-upload">
         <label id="dropzone" class="dropzone">
-          <i class="fa-solid fa-cloud-arrow-up text-4xl text-teal-600"></i>
-          <span class="font-semibold mt-2">اضغط للاختيار أو اسحب الملف هنا</span>
-          <span class="text-xs text-slate-500">MP4 · MOV · MP3 · WAV · M4A</span>
+          <svg class="ico ico-xl"><use href="#i-upload"/></svg>
+          <b>اضغط للاختيار أو اسحب الملف هنا</b>
+          <small>MP4 · MOV · MP3 · WAV · M4A</small>
           <input id="fileInput" type="file" class="hidden" accept="video/*,audio/*,.mp4,.mov,.mp3,.wav,.m4a">
         </label>
-        <p id="fileName" class="text-sm text-teal-700 mt-2 hidden"></p>
+        <p id="fileName" class="file-name hidden"></p>
       </div>
 
       <div id="tab-url" class="hidden">
-        <input id="urlInput" type="url" dir="ltr" placeholder="https://..." class="input">
-        <p class="text-xs text-slate-500 mt-2">
-          <i class="fa-solid fa-circle-info"></i>
-          تأكد أن لديك حق استخدام المحتوى؛ الرفع المباشر هو الخيار الأسلم.
-        </p>
+        <input id="urlInput" type="url" dir="ltr" placeholder="https://..." class="input" autocomplete="off" maxlength="2000">
+        <p class="hint">تأكد أن لديك حق استخدام المحتوى؛ الرفع المباشر هو الخيار الأسلم.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- 2) الإعدادات -->
-    <section class="card">
-      <h2 class="card-title"><i class="fa-solid fa-2"></i> الإعدادات</h2>
-
-      <div class="grid md:grid-cols-2 gap-5">
-        <!-- الفلاتر -->
+    <div class="card">
+      <h2 class="card-title"><span class="num">2</span> الإعدادات</h2>
+      <div class="grid2">
         <div>
-          <h3 class="font-semibold mb-2">الفلاتر</h3>
+          <h3 class="sub">الفلاتر</h3>
           <label class="check"><input type="checkbox" id="optVideo" checked> تشويش المشاهد غير اللائقة</label>
-          <label class="check"><input type="checkbox" id="optText" > تشويش النصوص والشعارات (OCR)</label>
+          <label class="check"><input type="checkbox" id="optText"> تشويش النصوص والشعارات (OCR)</label>
           <label class="check"><input type="checkbox" id="optMusic" checked> إزالة الموسيقى وإبقاء الصوت البشري</label>
           <label class="check"><input type="checkbox" id="optProfanity"> كتم الألفاظ غير اللائقة</label>
           <label class="check"><input type="checkbox" id="optSubs"> تفريغ نصي تلقائي (Whisper)</label>
         </div>
-
-        <!-- التغطية -->
         <div>
-          <h3 class="font-semibold mb-2">نوع التغطية</h3>
-          <div class="grid grid-cols-3 gap-2 mb-3">
+          <h3 class="sub">نوع التغطية</h3>
+          <div class="radios">
             <label class="radio"><input type="radio" name="coverType" value="blur" checked><span>Blur</span></label>
             <label class="radio"><input type="radio" name="coverType" value="pixelate"><span>Pixelate</span></label>
             <label class="radio"><input type="radio" name="coverType" value="mask"><span>Mask</span></label>
           </div>
-          <label class="text-sm">شدة التغطية: <b id="blurVal">50</b>%</label>
-          <input id="blurLevel" type="range" min="10" max="100" value="50" class="w-full accent-teal-600">
-
-          <h3 class="font-semibold mt-3 mb-2">بديل الموسيقى</h3>
+          <label class="small">شدة التغطية: <b id="blurVal">50</b>%</label>
+          <input id="blurLevel" type="range" min="10" max="100" value="50" class="range">
+          <h3 class="sub">بديل الموسيقى</h3>
           <select id="musicReplace" class="input">
-            <option value="none">بدون (صمت)</option>
-            <option value="rain">صوت المطر</option>
-            <option value="leaves">أوراق الشجر</option>
-            <option value="wind">رياح هادئة</option>
+            <option value="none">بدون (صمت)</option><option value="rain">صوت المطر</option>
+            <option value="leaves">أوراق الشجر</option><option value="wind">رياح هادئة</option>
           </select>
-
-          <h3 class="font-semibold mt-3 mb-2">الجودة</h3>
+          <h3 class="sub">الجودة</h3>
           <select id="quality" class="input">
-            <option value="720">HD 720p</option>
-            <option value="1080" selected>Full HD 1080p</option>
-            <option value="2160">4K</option>
-            <option value="audio">MP3 (صوت فقط)</option>
+            <option value="720">HD 720p</option><option value="1080" selected>Full HD 1080p</option>
+            <option value="2160">4K</option><option value="audio">MP3 (صوت فقط)</option>
           </select>
         </div>
       </div>
-
-      <div class="grid md:grid-cols-2 gap-3 mt-5">
-        <button id="previewBtn" class="btn-secondary"><i class="fa-solid fa-eye ml-1"></i> معاينة 30 ثانية</button>
-        <button id="processBtn" class="btn-primary"><i class="fa-solid fa-wand-magic-sparkles ml-1"></i> معالجة كاملة</button>
+      <div class="grid2 mt">
+        <button id="previewBtn" class="btn btn-soft" type="button"><svg class="ico"><use href="#i-eye"/></svg> معاينة 30 ثانية</button>
+        <button id="processBtn" class="btn btn-main" type="button"><svg class="ico"><use href="#i-wand"/></svg> معالجة كاملة</button>
       </div>
-    </section>
+    </div>
 
-    <!-- 3) التقدم -->
-    <section id="progressCard" class="card hidden">
-      <h2 class="card-title"><i class="fa-solid fa-gear fa-spin"></i> جارٍ المعالجة</h2>
-      <p id="stageText" class="text-sm text-slate-600 mb-2">...</p>
-      <div class="bar"><div id="barFill" class="bar-fill" style="width:0%"></div></div>
-      <p id="barPct" class="text-left text-xs text-slate-500 mt-1" dir="ltr">0%</p>
-    </section>
+    <div id="progressCard" class="card hidden">
+      <h2 class="card-title">جارٍ المعالجة</h2>
+      <p id="stageText" class="small">...</p>
+      <div class="bar-track"><div id="barFill" class="bar-fill"></div></div>
+      <p id="barPct" class="small pct" dir="ltr">0%</p>
+    </div>
 
-    <!-- 4) النتيجة -->
-    <section id="resultCard" class="card hidden">
-      <h2 class="card-title"><i class="fa-solid fa-circle-check text-green-600"></i> النتيجة</h2>
-      <div id="demoNote" class="note hidden">
-        وضع تجريبي: لم يُضبط عنوان السيرفر في <code>script.js</code> (API_BASE)، لذا الناتج هو الملف الأصلي دون معالجة فعلية.
-      </div>
-      <div id="player" class="mb-4"></div>
+    <div id="resultCard" class="card hidden">
+      <h2 class="card-title"><svg class="ico ok"><use href="#i-check"/></svg> النتيجة</h2>
+      <div id="demoNote" class="note hidden">وضع تجريبي: لم يُضبط عنوان السيرفر في <code>script.js</code> (API_BASE)، لذا الناتج هو الملف الأصلي دون معالجة فعلية.</div>
+      <div id="player" class="player"></div>
 
-      <!-- المحرر اليدوي -->
-      <details class="mb-4" open>
-        <summary class="font-semibold cursor-pointer"><i class="fa-solid fa-sliders ml-1"></i> المحرر اليدوي</summary>
-        <p class="text-xs text-slate-500 my-2">الأشرطة تمثل المقاطع المعالَجة. أضف تغطية لمنطقة فاتت الذكاء الاصطناعي أو احذف ما أخطأ فيه.</p>
+      <details class="editor" open>
+        <summary><svg class="ico"><use href="#i-penpaper"/></svg> المحرر اليدوي</summary>
+        <p class="hint">الأشرطة تمثل المقاطع المعالَجة. اضغط على شريط لحذفه، أو أضف مقطعاً فاتَ الذكاء الاصطناعي.</p>
         <div id="timeline" class="timeline"></div>
-        <div class="flex flex-wrap gap-2 items-end mt-3" dir="rtl">
-          <label class="text-xs">من (ث)<input id="segStart" type="number" min="0" value="0" class="input-sm"></label>
-          <label class="text-xs">إلى (ث)<input id="segEnd" type="number" min="1" value="5" class="input-sm"></label>
-          <label class="text-xs">النوع
-            <select id="segType" class="input-sm">
-              <option value="blur">تشويش مرئي</option>
-              <option value="mute">كتم صوت</option>
-            </select>
-          </label>
-          <button id="addSeg" class="btn-secondary !py-1 !px-3"><i class="fa-solid fa-plus"></i> إضافة</button>
-          <button id="applyEdits" class="btn-secondary !py-1 !px-3"><i class="fa-solid fa-rotate"></i> إعادة التصدير</button>
+        <div class="seg-form">
+          <label>من (ث)<input id="segStart" type="number" min="0" value="0" class="input-sm"></label>
+          <label>إلى (ث)<input id="segEnd" type="number" min="1" value="5" class="input-sm"></label>
+          <label>النوع<select id="segType" class="input-sm"><option value="blur">تشويش مرئي</option><option value="mute">كتم صوت</option></select></label>
+          <button id="addSeg" class="btn btn-soft btn-sm" type="button"><svg class="ico"><use href="#i-plus"/></svg> إضافة</button>
+          <button id="applyEdits" class="btn btn-soft btn-sm" type="button">إعادة التصدير</button>
         </div>
       </details>
 
-      <div class="grid md:grid-cols-2 gap-3">
-        <button id="saveOffline" class="btn-secondary"><i class="fa-solid fa-floppy-disk ml-1"></i> حفظ للأوفلاين</button>
-        <a id="downloadLink" class="btn-primary text-center" download><i class="fa-solid fa-download ml-1"></i> تنزيل للجهاز</a>
+      <div class="grid2">
+        <button id="saveOffline" class="btn btn-soft" type="button"><svg class="ico"><use href="#i-save"/></svg> حفظ للأوفلاين</button>
+        <a id="downloadLink" class="btn btn-main" download><svg class="ico"><use href="#i-download"/></svg> تنزيل للجهاز</a>
       </div>
-      <a id="subsLink" class="hidden text-sm text-teal-700 underline mt-3 inline-block" download>تنزيل ملف الترجمة (SRT)</a>
-    </section>
+      <a id="subsLink" class="hidden link" download rel="noopener noreferrer">تنزيل ملف الترجمة (SRT)</a>
+    </div>
+  </section>
 
-    <!-- 5) المكتبة المحفوظة -->
-    <section class="card">
-      <h2 class="card-title"><i class="fa-solid fa-folder-open"></i> المحفوظات (أوفلاين)</h2>
-      <p class="note">
-        تنبيه: متصفح Safari على الآيفون قد يحذف البيانات المحلية عند عدم الاستخدام. احتفظ بنسخة عبر «تنزيل للجهاز».
-      </p>
-      <ul id="library" class="space-y-2 mt-3"></ul>
-      <p id="libEmpty" class="text-sm text-slate-500">لا توجد ملفات محفوظة بعد.</p>
-    </section>
-  </main>
+  <!-- ================= المحفوظات ================= -->
+  <section class="view" data-view="library">
+    <div class="card">
+      <h2 class="card-title"><svg class="ico"><use href="#i-doc"/></svg> المحفوظات (أوفلاين)</h2>
+      <p class="note">الملفات مشفّرة (AES-256) داخل جهازك. Safari على الآيفون قد يحذف البيانات عند عدم الاستخدام، فاحتفظ بنسخة عبر «تنزيل للجهاز».</p>
+      <ul id="library" class="lib"></ul>
+      <p id="libEmpty" class="small">لا توجد ملفات محفوظة بعد.</p>
+    </div>
+  </section>
 
-  <div id="toast" class="toast hidden"></div>
+  <!-- ================= الإعدادات ================= -->
+  <section class="view" data-view="settings">
+    <div class="card">
+      <h2 class="card-title"><svg class="ico spin-on-view"><use href="#i-gear"/></svg> الإعدادات</h2>
+      <label class="check"><input type="checkbox" id="setSaveDefaults" checked> تذكّر اختياراتي الافتراضية للفلاتر</label>
+      <label class="check"><input type="checkbox" id="setReduceMotion"> تقليل الحركة والمؤثرات</label>
+      <div class="grid2 mt">
+        <button id="replayIntro" class="btn btn-soft" type="button"><svg class="ico"><use href="#i-play"/></svg> إعادة عرض المقدمة</button>
+        <button id="wipeData" class="btn btn-danger" type="button"><svg class="ico"><use href="#i-trash"/></svg> مسح كل البيانات</button>
+      </div>
+      <p class="hint"><svg class="ico ico-s"><use href="#i-shield"/></svg> «مسح كل البيانات» يحذف المحفوظات ومفتاح التشفير والإعدادات وذاكرة التطبيق المؤقتة.</p>
+    </div>
+  </section>
 
-  <script src="script.js"></script>
+  <!-- ================= التثبيت والمشاركة ================= -->
+  <section class="view" data-view="install">
+
+    <div class="card hero-card">
+      <svg class="ico ico-xl"><use href="#i-compass"/></svg>
+      <h2>ثبّت Pure Audio على جهازك</h2>
+      <p class="small">يعمل كتطبيق مستقل بدون شريط المتصفح، ومع دعم العمل بدون إنترنت.</p>
+      <button id="installBtn" class="btn btn-main btn-wide" type="button"><svg class="ico"><use href="#i-download"/></svg><span id="installLabel">تثبيت التطبيق</span></button>
+      <p id="installMsg" class="hint"></p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">كيف أثبّت التطبيق؟</h2>
+
+      <details id="g-ios" class="guide">
+        <summary><svg class="ico"><use href="#i-phone"/></svg> آيفون (iOS Safari)</summary>
+        <ol class="steps">
+          <li>افتح الموقع في <b>Safari</b> (وليس داخل تطبيق آخر).</li>
+          <li>اضغط زر المشاركة <svg class="ico ico-s inline"><use href="#i-share"/></svg> أسفل المتصفح.</li>
+          <li>اختر <b>«إضافة إلى الشاشة الرئيسية»</b> <svg class="ico ico-s inline"><use href="#i-plus"/></svg>.</li>
+          <li>اضغط <b>«إضافة»</b> أعلى الشاشة.</li>
+        </ol>
+      </details>
+
+      <details id="g-android" class="guide">
+        <summary><svg class="ico"><use href="#i-phone"/></svg> سامسونج / أندرويد (Chrome)</summary>
+        <ol class="steps">
+          <li>اضغط على قائمة النقاط الثلاث <svg class="ico ico-s inline"><use href="#i-dots"/></svg> أعلى المتصفح.</li>
+          <li>اختر <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li>
+          <li>أكّد بالضغط على <b>«تثبيت»</b>.</li>
+        </ol>
+      </details>
+
+      <details id="g-pc" class="guide">
+        <summary><svg class="ico"><use href="#i-monitor"/></svg> الكمبيوتر (PC / Mac)</summary>
+        <ol class="steps">
+          <li>في Chrome أو Edge اضغط أيقونة التثبيت <svg class="ico ico-s inline"><use href="#i-download"/></svg> في شريط العنوان.</li>
+          <li>اضغط <b>«Install / تثبيت»</b>.</li>
+          <li>في Safari على Mac: ملف ← «إضافة إلى Dock».</li>
+        </ol>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><svg class="ico"><use href="#i-share"/></svg> مشاركة التطبيق</h2>
+      <div class="grid2">
+        <button id="shareBtn" class="btn btn-main" type="button"><svg class="ico"><use href="#i-share"/></svg> مشاركة التطبيق</button>
+        <button id="copyBtn" class="btn btn-soft" type="button"><svg class="ico"><use href="#i-copy"/></svg> نسخ الرابط</button>
+      </div>
+      <p class="hint">واتساب، تليجرام ومواقع التواصل عبر قائمة المشاركة في جهازك.</p>
+    </div>
+
+    <div class="card qr-card">
+      <h2 class="card-title"><svg class="ico"><use href="#i-qr"/></svg> رمز QR</h2>
+      <div class="qr-frame">
+        <img id="qrImg" src="qr.png" alt="رمز QR لفتح التطبيق" width="220" height="220">
+        <div id="qrFallback" class="qr-fallback hidden"></div>
+      </div>
+      <p class="small">امسح الرمز بكاميرا هاتفك لفتح التطبيق مباشرة.</p>
+    </div>
+  </section>
+</main>
+
+<!-- ====== شريط التنقل السفلي ====== -->
+<nav class="nav" aria-label="التنقل">
+  <button class="nav-btn active" data-go="home" type="button" aria-label="الرئيسية"><svg class="ico"><use href="#i-home"/></svg><span>الرئيسية</span></button>
+  <button class="nav-btn" data-go="library" type="button" aria-label="المحفوظات"><svg class="ico"><use href="#i-doc"/></svg><span>المحفوظات</span></button>
+  <button class="nav-btn nav-gear" data-go="settings" type="button" aria-label="الإعدادات"><svg class="ico"><use href="#i-gear"/></svg><span>الإعدادات</span></button>
+  <button class="nav-btn" data-go="install" type="button" aria-label="التثبيت والمشاركة"><svg class="ico"><use href="#i-compass"/></svg><span>التثبيت</span></button>
+</nav>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<!-- مكتبة توليد QR احتياطية (تُستخدم فقط إذا لم توجد qr.png) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

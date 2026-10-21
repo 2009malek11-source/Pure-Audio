@@ -1,28 +1,17 @@
-# SafeMedia PWA
+# Pure Audio PWA
 
-واجهة PWA بملفات مسطحة (جاهزة لـ GitHub Pages): `index.html` · `style.css` · `script.js` · `sw.js` · `manifest.json` + أيقونات.
+ملفات مسطحة (Flat) جاهزة لـ GitHub Pages: `index.html` · `style.css` · `script.js` · `sw.js` · `manifest.json` + `logo.png` + `icon*.png`.
 
-## النشر على GitHub Pages
-1. ارفع كل الملفات إلى جذر مستودع GitHub.
-2. Settings → Pages → اختر الفرع `main` والمجلد `/ (root)`.
-3. افتح الرابط من الهاتف واختر «تثبيت التطبيق».
+## النشر
+1. ارفع كل الملفات إلى جذر المستودع، ثم Settings → Pages → فرع `main` والمجلد `/ (root)`.
+2. أضف صورة `qr.png` في الجذر (إن لم توجد يولّد التطبيق رمز QR تلقائياً من رابط الموقع).
+3. افتح الرابط على الهاتف: زر «تثبيت» (أندرويد/كمبيوتر) يطلب التثبيت من المتصفح، وعلى الآيفون اتبع شرح Safari داخل التطبيق.
 
-## الوضع التجريبي والسيرفر
-- بدون سيرفر: تعمل الواجهة كاملة (رفع، إعدادات، محرر، حفظ أوفلاين) لكن الناتج هو الملف الأصلي.
-- للمعالجة الفعلية: انشر `server_example.py` (يحتاج استكمال دوال الذكاء الاصطناعي) ثم ضع عنوانه في `API_BASE` داخل `script.js`.
+## الأمان
+- CSP عبر وسم meta (تحقق منها من CSP داخل index.html). ملاحظة: `frame-ancestors` لا تعمل عبر meta، وGitHub Pages لا يتيح ترويسات مخصصة.
+- لا `eval` ولا `innerHTML`؛ كل النصوص تُعرض بـ textContent بعد التعقيم، والروابط تُقبل http/https فقط.
+- المحفوظات مشفّرة AES-256-GCM بمفتاح غير قابل للتصدير داخل IndexedDB. هذا يحمي الملفات من الاطلاع المباشر على القرص، لكنه لا يحمي من سكربت خبيث يعمل داخل الصفحة نفسها، لذلك أبقينا CSP صارمة.
+- عند ضبط `API_BASE` أضف عنوان السيرفر إلى `connect-src` في CSP.
 
-## عقد الـ API
-| الطريقة | المسار | الوظيفة |
-|---|---|---|
-| POST | /uploads/init | بدء رفع مجزأ → `upload_id` |
-| PUT | /uploads/{id}/chunk?index=N | رفع جزء |
-| POST | /uploads/{id}/complete | دمج الأجزاء |
-| POST | /jobs | `{upload_id أو url, options, preview}` → `job_id` |
-| GET | /jobs/{id} | `{status, progress, stage, result_url, segments, duration, subtitles_url}` |
-| POST | /jobs/{id}/edits | `{segments:[{start,end,type}]}` لإعادة التصدير |
-
-## ملاحظات
-- GitHub Pages يستضيف الواجهة فقط؛ المعالجة تحتاج سيرفراً (يفضّل GPU).
-- خدمة العمل بدون إنترنت تتطلب HTTPS (متوفر في GitHub Pages).
-- Safari قد يمسح IndexedDB؛ احتفظ دائماً بنسخة عبر «تنزيل للجهاز».
-- تأكد من حقوق استخدام المحتوى قبل تحميله عبر الروابط.
+## السيرفر
+`server_example.py` هيكل FastAPI فقط (دوال YOLO/Demucs/Whisper/FFmpeg مكتوبة كـ TODO). عقد الـ API: `/uploads/init` · `/uploads/{id}/chunk` · `/uploads/{id}/complete` · `/jobs` · `/jobs/{id}` · `/jobs/{id}/edits`.
